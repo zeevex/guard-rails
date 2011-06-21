@@ -50,7 +50,7 @@ module Guard
     def build_rails_command
       case rails_version
         when 2 then build_rails_command_2
-        when 3 then build_rails_command 3
+        when 3 then build_rails_command_3
         else raise ArgumentError, "Unknown rails version: #{rails_version}"
       end
     end
