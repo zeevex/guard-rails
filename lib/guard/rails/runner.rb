@@ -23,22 +23,7 @@ module Guard
     def stop
       if File.file?(pid_file)
         pid = File.read(pid_file).strip
-        system %{kill -TERM #{pid}}
-        i = 5
-        while system %{/bin/kill -0 #{pid} 2>/dev/null} and i > 0 do
-          puts "Sleeping on server PID..."
-          sleep 2
-          i -= 1
-        end
-        i = 5
-        while system %{/bin/kill -0 #{pid} 2>/dev/null} and i > 0 do
-          puts "Sending kill -KILL"
-          system %{/bin/kill -KILL #{pid}}
-          sleep 2
-        end
-
-        # return false if stop failed
-        ! system %{/bin/kill -0 #{pid} 2>/dev/null}
+        polite_kill pid
       end
     end
     
@@ -111,9 +96,26 @@ module Guard
       sleep sleep_time
     end
 
+    def polite_kill(pid)
+      system %{kill -TERM #{pid}}
+      i = 5
+      while system %{/bin/kill -0 #{pid} 2>/dev/null} and i > 0 do
+        sleep 1
+        i -= 1
+      end
+      i = 5
+      while system %{/bin/kill -0 #{pid} 2>/dev/null} and i > 0 do
+        system %{/bin/kill -KILL #{pid}}
+        sleep 1
+      end
+
+      # return false if stop failed
+      ! system %{/bin/kill -0 #{pid} 2>/dev/null}
+    end
+    
     def kill_unmanaged_pid!
       if pid = unmanaged_pid
-        system %{kill -TERM #{pid}}
+        polite_kill pid
       end
     end
 
