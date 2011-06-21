@@ -15,6 +15,15 @@ Lots of fun options!
 * `:force_run` kills any process that's holding open the listen port before attempting to (re)start Rails (default `false`).
 * `:daemon` runs the server as a daemon, without any output to the terminal that ran `guard` (default `false`).
 * `:timeout` waits this number of seconds when restarting the Rails server before reporting there's a problem (default `20`).
+* `:rails_version` sets the rails major version; for version 3 uses "rails s" to launch, for version 2 uses "rackup" to launch, which requires a config.ru file (default `3`).
+
+Example RAILS_ROOT/config.ru file for Rails 2.3:
+
+    require "config/environment"
+    
+    use Rails::Rack::LogTailer
+    use Rails::Rack::Static
+    run ActionController::Dispatcher.new
 
 This is super-alpha, but it works for me! Only really hand-tested in Mac OS X. Feel free to fork'n'fix for other
 OSes, and to add some more real tests.

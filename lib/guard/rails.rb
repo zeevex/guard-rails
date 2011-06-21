@@ -12,7 +12,8 @@ module Guard
         :environment => 'development',
         :start_on_start => true,
         :force_run => false,
-        :timeout => 20
+        :timeout => 20,
+        :rails_version => 3
       }
 
     def initialize(watchers = [], options = {})

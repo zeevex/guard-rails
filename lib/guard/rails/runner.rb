@@ -31,6 +31,26 @@ module Guard
     end
 
     def build_rails_command
+      case rails_version
+        when 2 then build_rails_command_2
+        when 3 then build_rails_command 3
+        else raise ArgumentError, "Unknown rails version: #{rails_version}"
+      end
+    end
+
+    def build_rails_command_2
+      rails_options = [
+        '-E', options[:environment],
+        '-p', options[:port],
+        '--pid', pid_file
+      ]
+
+      rails_options << '-D' if options[:daemon]
+
+      %{sh -c 'cd #{Dir.pwd} && rackup #{rails_options.join(' ')} &'}
+    end
+
+    def build_rails_command_3
       rails_options = [
         '-e', options[:environment],
         '-p', options[:port],
@@ -55,6 +75,11 @@ module Guard
     end
 
     private
+    
+    def rails_version
+      options[:rails_version] || 3
+    end
+    
     def run_rails_command!
       system build_rails_command
     end
