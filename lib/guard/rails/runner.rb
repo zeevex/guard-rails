@@ -99,7 +99,7 @@ module Guard
     
     def run_rails_command!
       cmd = build_rails_command
-      redir = options[:hide_output] ? ">/dev/null" : ""
+      redir = options[:hide_output] ? ">/dev/null 2>/dev/null" : ""
       system %{sh -c '#{cmd}' #{redir} &}
     end
 
