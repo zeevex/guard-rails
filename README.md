@@ -16,6 +16,7 @@ Lots of fun options!
 * `:daemon` runs the server as a daemon, without any output to the terminal that ran `guard` (default `false`).
 * `:timeout` waits this number of seconds when restarting the Rails server before reporting there's a problem (default `20`).
 * `:rails_version` sets the rails major version; for version 3 uses "rails s" to launch, for version 2 uses "rackup" to launch, which requires a config.ru file (default `3`).
+* `:hide_output` sends stdout to /dev/null if true (default `false`)
 
 Example RAILS_ROOT/config.ru file for Rails 2.3:
 

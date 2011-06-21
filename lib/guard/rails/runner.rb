@@ -10,6 +10,7 @@ module Guard
 
     def start
       kill_unmanaged_pid! if options[:force_run]
+      File.unlink pid_file if File.exists?(pid_file)
       run_rails_command!
       count = 0
       while !has_pid? && count < MAX_WAIT_COUNT
@@ -21,7 +22,23 @@ module Guard
 
     def stop
       if File.file?(pid_file)
-        system %{kill -INT #{File.read(pid_file).strip}}
+        pid = File.read(pid_file).strip
+        system %{kill -TERM #{pid}}
+        i = 5
+        while system %{/bin/kill -0 #{pid} 2>/dev/null} and i > 0 do
+          puts "Sleeping on server PID..."
+          sleep 2
+          i -= 1
+        end
+        i = 5
+        while system %{/bin/kill -0 #{pid} 2>/dev/null} and i > 0 do
+          puts "Sending kill -KILL"
+          system %{/bin/kill -KILL #{pid}}
+          sleep 2
+        end
+
+        # return false if stop failed
+        ! system %{/bin/kill -0 #{pid} 2>/dev/null}
       end
     end
     
@@ -47,7 +64,7 @@ module Guard
 
       rails_options << '-D' if options[:daemon]
 
-      %{sh -c 'cd #{Dir.pwd} && rackup #{rails_options.join(' ')} &'}
+      %{rackup #{rails_options.join(' ')}}
     end
 
     def build_rails_command_3
@@ -59,7 +76,7 @@ module Guard
 
       rails_options << '-d' if options[:daemon]
 
-      %{sh -c 'cd #{Dir.pwd} && rails s #{rails_options.join(' ')} &'}
+      %{rails s #{rails_options.join(' ')}}
     end
 
     def pid_file
@@ -81,7 +98,9 @@ module Guard
     end
     
     def run_rails_command!
-      system build_rails_command
+      cmd = build_rails_command
+      redir = options[:hide_output] ? ">/dev/null" : ""
+      system %{sh -c '#{cmd}' #{redir} &}
     end
 
     def has_pid?
@@ -94,7 +113,7 @@ module Guard
 
     def kill_unmanaged_pid!
       if pid = unmanaged_pid
-        system %{kill -INT #{pid}}
+        system %{kill -TERM #{pid}}
       end
     end
 
